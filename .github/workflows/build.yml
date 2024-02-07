@@ -21,3 +21,19 @@ jobs:
       run: mvn clean install
     - name: Test
       run: mvn test -DskipTests=false
+
+  install-mysql:
+    name: Install MySQL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up MySQL
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server mysql-client
+          sudo systemctl start mysql
+          sudo systemctl enable mysql
+          sudo systemctl status mysql
+
