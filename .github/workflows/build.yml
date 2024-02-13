@@ -24,4 +24,5 @@ jobs:
           cache: maven
 
       - name: Build Maven
+              exit 1
         run: mvn clean install -DskipTests=true
