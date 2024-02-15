@@ -6,12 +6,12 @@ import com.webapplication.Webapp.repository.UserRepository;
 import com.webapplication.Webapp.service.HealthCheckService;
 import com.webapplication.Webapp.service.UserService;
 
-import ch.qos.logback.classic.Logger;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -33,8 +33,6 @@ public class UserController {
 
     @Autowired
     private HealthCheckService healthCheckService;
-
-    private Logger logger;
 
     @GetMapping("/v1/user/self")
      public ResponseEntity<UserResponse> fetchUserDetails(@RequestHeader("Authorization") String header) {
@@ -80,26 +78,26 @@ public class UserController {
             }
              
             if (newUser.getUsername()== null || newUser.getUsername().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email id is mandatory");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Email id is mandatory\"}");
             }
 
             if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password is mandatory");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Password is mandatory\"}");
             }
             
             if (newUser.getFirst_name() == null || newUser.getFirst_name().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("First Name is mandatory");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"First Name is mandatory\"}");
             }
             if (newUser.getLast_name() == null || newUser.getLast_name().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Last Name is mandatory");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Last Name is mandatory\"}");
             }
 
             if (!CheckValidEmail(newUser.getUsername())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Email Address");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Invalid Email Address\"}");
             }
 
             if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
             }
 
             userService.createUser(newUser);
@@ -109,7 +107,8 @@ public class UserController {
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("User Already Exists!!");
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"User Already Exists!!\"}");
         }
     }
 
@@ -132,7 +131,7 @@ public class UserController {
 
             if (ValidCredentials) {
                 if (!user.getUsername().equals(newUser.getUsername()) ) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Not Authorized to update other users");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Not Authorized to update username\"}");
                 }
 
                 user.setFirst_name(newUser.getFirst_name());
@@ -140,19 +139,19 @@ public class UserController {
 
                 
                 if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password is mandatory");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Password is mandatory\"}");
                 }
                 
                 if (newUser.getFirst_name() == null || newUser.getFirst_name().isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("First Name is mandatory");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"First Name is mandatory\"}");
                 }
                 
                 if (newUser.getLast_name() == null || newUser.getLast_name().isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Last Name is mandatory");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Last Name is mandatory\"}");
                 }
 
                 if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
                 }
                 
                 if (newUser.getPassword() != null && !newUser.getPassword().isEmpty()) {
