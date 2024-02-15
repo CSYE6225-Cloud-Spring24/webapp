@@ -24,10 +24,11 @@ jobs:
             mysql user: '${{secrets.DATABASE_USERNAME}}'
             mysql password: '${{secrets.DATABASE_PASSWORD}}'
 
-      - name: Build and Test
-        run: mvn clean install
-
       - name: Run Tests
         run: mvn test
+        
+      - name: Build
+        run: mvn clean install
+
 
 
