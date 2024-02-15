@@ -260,7 +260,7 @@ class WebappApplicationTests {
 				.put("/v1/user/self")
 				.then()
 				.statusCode(HttpStatus.BAD_REQUEST.value())
-				.body(equalTo("First Name is mandatory"));
+				.body("error",equalTo("First Name is mandatory"));
 	}
 
 	@Test
@@ -280,7 +280,7 @@ class WebappApplicationTests {
 				.put("/v1/user/self")
 				.then()
 				.statusCode(HttpStatus.BAD_REQUEST.value())
-				.body(equalTo("Last Name is mandatory"));
+				.body("error",equalTo("Last Name is mandatory"));
 	}
 
 	private String getBase64Credentials(String username, String password) {
