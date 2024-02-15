@@ -80,6 +80,11 @@ class WebappApplicationTests {
 		}
         
 		given()
+		.get("/healthz")
+		.then()
+		.statusCode(HttpStatus.OK.value());
+		
+		given()
 				.contentType(ContentType.JSON)
 				.body(newUser)
 				.when()
