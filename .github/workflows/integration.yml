@@ -9,7 +9,11 @@ jobs:
     name: Integration Test
     runs-on: ubuntu-latest
     env:
+      DATABASE: webappDB
       DATABASE_URL: ${{secrets.DATABASE_URL}}
+      DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
+      DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 21
@@ -17,17 +21,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-
-      - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-            mysql database: 'webappDB'
-            mysql user: '${{secrets.DATABASE_USERNAME}}'
-            mysql password: '${{secrets.DATABASE_PASSWORD}}'
-
-      - name: Build
-        run: mvn clean install -DskipTests=false
-
-
+      - name: Start MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $DATABASE;" -u$DATABASE_USERNAME -p$DATABASE_PASSWORD
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
 
 
