@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,7 +15,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private UUID id;
     @Column(nullable = false)
     private String first_name;
     @Column(nullable = false)
@@ -30,7 +31,7 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime account_updated;
 
-    public User(Long id, String first_name, String last_name, String username, String password, LocalDateTime account_created, LocalDateTime account_updated) {
+    public User(UUID id, String first_name, String last_name, String username, String password, LocalDateTime account_created, LocalDateTime account_updated) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
@@ -43,11 +44,11 @@ public class User {
     public User() {
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
