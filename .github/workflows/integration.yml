@@ -8,7 +8,8 @@ jobs:
   build: 
     name: Integration Test
     runs-on: ubuntu-latest
-
+    env:
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK 21
@@ -26,7 +27,7 @@ jobs:
 
       - name: Run Tests
         run: mvn test
-        
+
       - name: Build
         run: mvn clean install
 
