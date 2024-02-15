@@ -23,3 +23,10 @@ Return HTTP 503 Service Unavailable if the connection is unsuccessful.
 Added User API's to Create, Update and Get User details.
 
 Created a organization called 'CSYE6225-Cloud-Spring24' and made a repo called webapp. Forked the webapp from organization into my personal workspace and pushed my springboot application.
+
+### Assignment 3
+
+1. Implemented Integration tests for the /v1/user endpoint with a new GitHub Actions workflow. 
+2. Test 1 - Created an account, and using the GET call, validated account exists.
+3. Test 2 - Updated the account and using the GET call, validated the account was updated.
+
