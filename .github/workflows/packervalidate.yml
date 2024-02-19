@@ -1,0 +1,32 @@
+name: Packer Validate
+ 
+on:
+  pull_request:
+    branches:
+      - main
+ 
+jobs:
+  validate-packer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: ">=1.0.0" 
+ 
+      - name: Checkout code
+        uses: actions/checkout@v2
+ 
+      - name: Run `packer init`
+        id: init
+        run: packer init main.pkr.hcl
+ 
+      - name: Run packer fmt
+        run: packer fmt --check main.pkr.hcl
+ 
+      - name: Fail if packer fmt fails
+        if: ${{ steps.setup.outputs.exit-code != 0 }}
+        run: exit 1
+ 
+      
