@@ -30,7 +30,7 @@ variable "zone" {
 variable "network" {
   type    = string
   default = "default"
-}
+    }
 
 source "googlecompute" "centos" {
   project_id          = var.project_id
