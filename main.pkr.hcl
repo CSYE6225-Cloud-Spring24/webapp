@@ -54,10 +54,6 @@ build {
     script = "mysql.sh"
   }
 
-  provisioner "shell" {
-    script = "check.sh"
-  }
-
   provisioner "file" {
     destination = "webapp-0.0.1-SNAPSHOT.jar"
   }
