@@ -30,7 +30,7 @@ variable "zone" {
 variable "network" {
   type    = string
   default = "default"
-    }
+}
 
 source "googlecompute" "centos" {
   project_id          = var.project_id
@@ -52,6 +52,10 @@ build {
 
   provisioner "shell" {
     script = "mysql.sh"
+  }
+
+  provisioner "shell" {
+    script = "check.sh"
   }
 
   provisioner "file" {
