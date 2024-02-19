@@ -13,7 +13,7 @@ jobs:
         uses: hashicorp/setup-packer@main
         id: setup
         with:
-          version: ">=1.0.0" 
+          version: "1.8.3" 
  
       - name: Checkout code
         uses: actions/checkout@v2
@@ -26,6 +26,13 @@ jobs:
         run: packer fmt --check main.pkr.hcl
  
       - name: Fail if packer fmt fails
+        if: ${{ steps.setup.outputs.exit-code != 0 }}
+        run: exit 1
+
+      - name: Run packer validate
+        run: packer validate main.pkr.hcl
+ 
+      - name: Fail if packer validate fails
         if: ${{ steps.setup.outputs.exit-code != 0 }}
         run: exit 1
  
