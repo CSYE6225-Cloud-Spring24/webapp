@@ -101,7 +101,7 @@ class WebappApplicationTests {
 				.then()
 				.assertThat()
 				.statusCode(HttpStatus.OK.value())
-				.body("username", equalTo("keerthana@gmail.com"))
+				.body("username", equalTo("test@gmail.com"))
 				.body("first_name", equalTo("Keerthana"))
 				.body("last_name", equalTo("Mikkili"));
 
