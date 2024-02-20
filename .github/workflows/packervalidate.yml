@@ -1,4 +1,4 @@
-name: Packer Validate
+name: Packer Fmt and Validate
  
 on:
   pull_request:
@@ -12,12 +12,12 @@ jobs:
         uses: hashicorp/setup-packer@main
         id: setup
         with:
-          version: "1.8.3" 
+          version: "latest" 
  
       - name: Checkout code
         uses: actions/checkout@v2
  
-      - name: Run `packer init`
+      - name: Run packer init
         id: init
         run: packer init main.pkr.hcl
  
