@@ -32,19 +32,19 @@ variable "network" {
   default = "default"
 }
 
-source "googlecompute" "centos" {
+source "googlecompute" "centos8" {
   project_id          = var.project_id
   source_image_family = var.source_image_family
   zone                = var.zone
   ssh_username        = var.gcp_ssh_username
-  image_name          = "packer-custom-centos8-image"
-  image_family        = "packer-custom-centos8-image-family"
+  image_name          = "packer-custom-image"
+  image_family        = "packer-custom-image-family"
   network             = var.network
   image_labels        = { created-by = "packer" }
 }
 
 build {
-  sources = ["source.googlecompute.centos"]
+  sources = ["source.googlecompute.centos8"]
 
   provisioner "shell" {
     script = "java.sh"
@@ -52,6 +52,13 @@ build {
 
   provisioner "shell" {
     script = "mysql.sh"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo adduser csye6225 --shell /usr/sbin/nologin",
+      "sudo usermod -aG csye6225 csye6225"
+    ]
   }
 
   provisioner "file" {
@@ -63,5 +70,12 @@ build {
     source      = "csye6225.service"
     destination = "/tmp/"
   }
-
+  
+  provisioner "shell" {
+    inline = [
+      "sudo chown csye6225: /tmp/webapp-0.0.1-SNAPSHOT.jar",
+      "sudo chown csye6225: /tmp/csye6225.service",
+      "sudo mv /tmp/csye6225.service /etc/systemd/system"
+    ]
+  }
 }
