@@ -22,7 +22,7 @@ jobs:
         run: packer init main.pkr.hcl
  
       - name: Run packer fmt
-        run: packer fmt main.pkr.hcl
+        run: packer fmt --check main.pkr.hcl
  
       - name: Fail if packer fmt fails
         if: ${{ steps.setup.outputs.exit-code != 0 }}
