@@ -26,8 +26,10 @@ jobs:
 
       - name: Setup google config
         uses: 'google-github-actions/auth@v2'
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS}}'
         with:
-          credentials_json: '${{secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS}}'
+          credentials_json: env.GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
