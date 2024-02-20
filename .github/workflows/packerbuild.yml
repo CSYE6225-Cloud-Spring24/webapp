@@ -50,7 +50,7 @@ jobs:
           cache: maven
       - name: Build Maven
         run: |
-          mvn clean package
+          mvn -B package --file pom.xml
           pwd
           mkdir stage && cp target/webapp-0.0.1-SNAPSHOT.jar stage   
           cp stage/*.jar packer-custom-centos8-image
