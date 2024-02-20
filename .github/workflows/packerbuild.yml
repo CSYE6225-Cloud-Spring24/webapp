@@ -23,11 +23,9 @@ jobs:
         run: ls -la
  
       - name: Step 3 - Configure GCP Credentials
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        run: |
-          echo "$GOOGLE_APPLICATION_CREDENTIALS" > gcp-key.json
-          gcloud auth activate-service-account --key-file=gcp-key.json
+        run:
+          gcloud auth activate-service-account --key-file=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
