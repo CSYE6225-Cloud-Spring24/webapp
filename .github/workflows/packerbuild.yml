@@ -21,11 +21,11 @@ jobs:
           pwd
       - name: check the current
         run: ls -la
- 
-      - name: Step 3 - Configure GCP Credentials
-        run:
-          gcloud auth activate-service-account --key-file=${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
+      - name: Setup google config
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS}}'
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
