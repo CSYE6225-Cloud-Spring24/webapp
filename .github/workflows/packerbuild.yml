@@ -1,0 +1,72 @@
+name: Packer Build Custom Image
+ 
+env:
+  AWS_REGION: us-east-1
+ 
+on:
+  pull_request:
+    branches: [ "main" ]
+ 
+jobs:
+  packer_init_validate_build:
+    runs-on: ubuntu-latest
+    name: Build Custom Image with Java Spring Boot Application artifacts
+    steps:
+      - name: Step 1 - Checkout code from branch
+        uses: actions/checkout@v2
+ 
+      - name: Step 2 - zip all the webApp files
+        run: |
+          zip -r webapp.zip ./
+          pwd
+      - name: check the current
+        run: ls -la
+ 
+      - name: Step 3 - Configure GCP Credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS" > gcp-key.json
+          gcloud auth activate-service-account --key-file=gcp-key.json
+
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: "latest"
+ 
+      - name: Run `packer init`
+        id: init
+        run: packer init main.pkr.hcl
+
+      - name: Run `packer fmt`
+        id: fmt
+        run: packer fmt main.pkr.hcl
+
+      - name: Run `packer validate`
+        id: validate
+        run: packer validate main.pkr.hcl
+      
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+      - name: Build Maven
+        run: |
+          mvn clean package
+          pwd
+          mkdir stage && cp target/webapp-0.0.1-SNAPSHOT.jar stage   
+          cp stage/*.jar packer-custom-centos8-image
+          cd packer-custom-centos8-image && ls -all
+
+      - name: Packer build
+        uses: hashicorp/packer-github-actions@master
+        with:
+          command: build
+          arguments: "-color=false -on-error=abort"
+          target: main.pkr.hcl
+     
+     
