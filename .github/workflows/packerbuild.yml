@@ -35,11 +35,18 @@ jobs:
         with:
           credentials_json: ${{secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS}}
 
-      - name: Start MySQL
-        run: |
-          sudo /etc/init.d/mysql start
-          mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $DATABASE;" -u$DATABASE_USERNAME -p$DATABASE_PASSWORD
-          
+      # - name: Start MySQL
+      #   run: |
+      #     sudo /etc/init.d/mysql start
+      #     mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $DATABASE;" -u$DATABASE_USERNAME -p$DATABASE_PASSWORD
+      
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'webappDB'
+          mysql user: 'web-app'
+          mysql password: '${{ secrets.DATABASE_PASSWORD }}'
+
       - name: Build with Maven
         run: |
           mvn -B package --file pom.xml
