@@ -47,7 +47,7 @@ build {
   sources = ["source.googlecompute.centos"]
 
   provisioner "shell" {
-    script = "java.sh"
+    script = "./mysql.sh"
   }
 
   provisioner "shell" {

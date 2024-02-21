@@ -1,7 +1,7 @@
 #!/bin/bash
-
-sudo dnf update -y
+# sudo dnf update -y
 sudo dnf upgrade -y
+sudo dnf install java-17-openjdk -y
 
 # Install MySQL
 echo "Installing MySQL"
