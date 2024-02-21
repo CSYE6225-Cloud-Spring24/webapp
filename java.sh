@@ -13,8 +13,9 @@ sudo dnf install maven -y
 
 # Update jdk version
 echo "Updating JDK Version"
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk>> ~/.bashrc
-export PATH=$JAVA_HOME/bin:$PATH>> ~/.bashrc
+# export JAVA_HOME=/usr/lib/jvm/java-17-openjdk>> ~/.bashrc
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk/>> ~/.source /etc/environment
+# export PATH=$JAVA_HOME/bin:$PATH>> ~/.bashrc
 
 # Check Java
 echo "Java Version"
