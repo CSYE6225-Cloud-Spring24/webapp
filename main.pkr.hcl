@@ -37,7 +37,7 @@ source "googlecompute" "centos" {
   source_image_family = var.source_image_family
   zone                = var.zone
   ssh_username        = var.gcp_ssh_username
-  image_name          = "packer-centos8-custom-image"
+  image_name          = "centos-image1"
   image_family        = "packer-custom8-image-family"
   network             = var.network
   image_labels        = { created-by = "packer" }
