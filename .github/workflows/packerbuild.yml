@@ -13,7 +13,6 @@ jobs:
       DATABASE_URL: ${{secrets.DATABASE_URL}}
       DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
       DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
-    name: Build Custom Image with Java Spring Boot Application artifacts
     steps:
       - name: Checkout code from branch
         uses: actions/checkout@v3
