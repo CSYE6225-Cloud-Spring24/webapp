@@ -32,19 +32,19 @@ variable "network" {
   default = "default"
 }
 
-source "googlecompute" "centos8" {
+source "googlecompute" "centos" {
   project_id          = var.project_id
   source_image_family = var.source_image_family
   zone                = var.zone
   ssh_username        = var.gcp_ssh_username
-  image_name          = "packer-custom-image"
-  image_family        = "packer-custom-image-family"
+  image_name          = "packer-centos-8-custom-image"
+  image_family        = "packer-custom-8-image-family"
   network             = var.network
   image_labels        = { created-by = "packer" }
 }
 
 build {
-  sources = ["source.googlecompute.centos8"]
+  sources = ["source.googlecompute.centos"]
 
   provisioner "shell" {
     script = "java.sh"
