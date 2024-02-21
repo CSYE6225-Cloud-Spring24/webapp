@@ -74,7 +74,7 @@ build {
       "sudo mv /tmp/csye6225.service /etc/systemd/system",
       "sudo systemctl start csye6225.service",
       "sudo systemctl enable csye6225.service",
-      "sudo systemctl restart csye6225.service",
+      "sudo systemctl daemon-reload csye6225.service",
       "sudo systemctl status csye6225.service"
     ]
   }
