@@ -37,8 +37,8 @@ source "googlecompute" "centos" {
   source_image_family = var.source_image_family
   zone                = var.zone
   ssh_username        = var.gcp_ssh_username
-  image_name          = "packer-centos-8-custom-image"
-  image_family        = "packer-custom-8-image-family"
+  image_name          = "packer-centos8-custom-image"
+  image_family        = "packer-custom8-image-family"
   network             = var.network
   image_labels        = { created-by = "packer" }
 }
@@ -76,7 +76,7 @@ build {
       "sudo chown csye6225: /tmp/Webapp-0.0.1-SNAPSHOT.jar",
       "sudo chown csye6225: /tmp/csye6225.service",
       "sudo mv /tmp/csye6225.service /etc/systemd/system",
-      "sudo systemctl start csye6225.service",
+      "sudo systemctl start csye6225.service"
       "sudo systemctl enable csye6225.service",
       "sudo systemctl restart csye6225.service",
       "sudo systemctl status csye6225.service"
