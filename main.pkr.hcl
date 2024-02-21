@@ -37,7 +37,7 @@ source "googlecompute" "centos" {
   source_image_family = var.source_image_family
   zone                = var.zone
   ssh_username        = var.gcp_ssh_username
-  image_name          = "centos-image1"
+  image_name          = "packer-custom-centos8-image"
   image_family        = "packer-custom8-image-family"
   network             = var.network
   image_labels        = { created-by = "packer" }
@@ -77,5 +77,13 @@ build {
       "sudo systemctl restart csye6225.service",
       "sudo systemctl status csye6225.service"
     ]
+  }
+
+  post-processor "googlecompute" {
+    project_id       = var.project_id
+    image_name       = "packer-custom-centos8-image"
+    image_family     = "packer-custom-centos8-image-family"
+    zone             = var.zone
+    image_visibility = "private"
   }
 }
