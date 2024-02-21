@@ -79,11 +79,4 @@ build {
     ]
   }
 
-  post-processor "googlecompute" {
-    project_id       = var.project_id
-    image_name       = "packer-custom-centos8-image"
-    image_family     = "packer-custom-centos8-image-family"
-    zone             = var.zone
-    image_visibility = "private"
-  }
 }
