@@ -9,7 +9,7 @@ packer {
 
 variable "project_id" {
   type    = string
-  default = "csye-6225-414222"
+  default = "devv-415008"
 }
 
 variable "gcp_ssh_username" {
