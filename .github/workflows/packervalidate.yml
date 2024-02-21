@@ -1,21 +1,42 @@
 name: Packer Fmt and Validate
- 
+
 on:
   pull_request:
     branches: [ "main" ]
- 
+
 jobs:
-  validate-packer:
+  build: 
+    name: Packer Validate
     runs-on: ubuntu-latest
+    env:
+      DATABASE: webappDB
+      DATABASE_URL: ${{secrets.DATABASE_URL}}
+      DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
+      DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+
     steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: 'webappDB'
+          mysql user: 'web-app'
+          mysql password: '${{ secrets.DATABASE_PASSWORD }}'
+          
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+      
       - name: Setup Packer
         uses: hashicorp/setup-packer@main
         id: setup
         with:
           version: "latest" 
- 
-      - name: Checkout code
-        uses: actions/checkout@v2
  
       - name: Run packer init
         id: init
@@ -36,3 +57,6 @@ jobs:
         run: exit 1
  
       
+
+
+

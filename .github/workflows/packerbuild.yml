@@ -2,11 +2,12 @@ name: Packer Build Custom Image
  
 on:
   pull_request:
-    branches: [ "main" ]
+   types: [closed]
  
 jobs:
   packer_init_validate_build:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
     env:
       DATABASE: webappDB
       DATABASE_URL: ${{secrets.DATABASE_URL}}
@@ -14,7 +15,7 @@ jobs:
       DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
     name: Build Custom Image with Java Spring Boot Application artifacts
     steps:
-      - name: Step 1 - Checkout code from branch
+      - name: Checkout code from branch
         uses: actions/checkout@v3
 
       - name: Set up JDK 17
@@ -23,7 +24,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
  
-      - name: Step 2 - zip all the webApp files
+      - name: Zip all the webApp files
         run: |
           zip -r webapp.zip ./
           pwd
@@ -35,11 +36,6 @@ jobs:
         with:
           credentials_json: ${{secrets.GCP_SERVICE_ACCOUNT_CREDENTIALS}}
 
-      # - name: Start MySQL
-      #   run: |
-      #     sudo /etc/init.d/mysql start
-      #     mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS $DATABASE;" -u$DATABASE_USERNAME -p$DATABASE_PASSWORD
-      
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
