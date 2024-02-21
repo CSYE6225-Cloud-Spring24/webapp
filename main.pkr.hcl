@@ -76,7 +76,7 @@ build {
       "sudo chown csye6225: /tmp/Webapp-0.0.1-SNAPSHOT.jar",
       "sudo chown csye6225: /tmp/csye6225.service",
       "sudo mv /tmp/csye6225.service /etc/systemd/system",
-      "sudo systemctl start csye6225.service"
+      "sudo systemctl start csye6225.service",
       "sudo systemctl enable csye6225.service",
       "sudo systemctl restart csye6225.service",
       "sudo systemctl status csye6225.service"
