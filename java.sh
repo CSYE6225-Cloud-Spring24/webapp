@@ -5,7 +5,7 @@ sudo dnf upgrade -y
 
 # Install Java 17
 echo "Installing Java"
-sudo dnf install java-17-openjdk-devel -y
+sudo dnf install java-17-openjdk -y
 
 # Install Maven
 echo "Installing Maven"
