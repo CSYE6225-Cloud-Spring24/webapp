@@ -7,7 +7,7 @@ sudo dnf upgrade -y
 echo "Installing MySQL"
 sudo dnf install mysql-server -y
 sudo systemctl start mysqld.service
-mysql -u root  -e "CREATE DATABASE db;"
+mysql -u root  -e "CREATE DATABASE webappDB;"
 mysql -u root  -e "CREATE USER 'web-app'@'localhost' IDENTIFIED BY 'web-app';"
 mysql -u root  -e "GRANT ALL ON *.* TO 'web-app'@'localhost';"
 mysql -u root  -e "FLUSH PRIVILEGES;"
