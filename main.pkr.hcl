@@ -75,7 +75,6 @@ build {
       "sudo systemctl daemon-reload",
       "sudo systemctl enable csye6225.service",
       "sudo systemctl start csye6225.service",
-      // Install Ops Agent and configure for application logs
       "sudo curl -sSO https://dl.google.com/cloudagents/add-google-cloud-ops-agent-repo.sh",
       "sudo bash add-google-cloud-ops-agent-repo.sh --also-install",
       "sudo systemctl enable google-cloud-ops-agent",
