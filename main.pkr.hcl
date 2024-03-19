@@ -83,5 +83,8 @@ build {
     ]
   }
 
+  provisioner "file" {
+    script = "OpsAgent.sh"
+  }
 }
 
