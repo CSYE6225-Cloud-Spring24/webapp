@@ -8,6 +8,9 @@ import com.webapplication.Webapp.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -25,7 +28,7 @@ import java.util.regex.Pattern;
 @RestController
 public class UserController {
 
-   @Autowired
+    @Autowired
     public UserService userService;
 
     @Autowired
@@ -34,10 +37,22 @@ public class UserController {
     @Autowired
     private HealthCheckService healthCheckService;
 
+    private static final Logger log = LogManager.getLogger(UserController.class);
+
     @GetMapping("/v1/user/self")
-     public ResponseEntity<UserResponse> fetchUserDetails(@RequestHeader("Authorization") String header) {
+    public ResponseEntity<UserResponse> fetchUserDetails(@RequestHeader("Authorization") String header,
+            HttpServletRequest request) {
         try {
+            ThreadContext.put("severity", "INFO");
+            ThreadContext.put("labels", "FetchUserInfo");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.info("Fetching user details...");
             if (!healthCheckService.VerifyDatabaseConnection()) {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Database connection not available.");
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(null);
             }
 
@@ -45,67 +60,128 @@ public class UserController {
             String base64Credentials = header.substring("Basic".length()).trim();
             String credentials = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
             String[] parts = credentials.split(":", 2);
-            System.out.println("credentials"+credentials);
-
+            System.out.println("credentials" + credentials);
             String username = parts[0];
             String password = parts[1];
-            System.out.println("username"+username);
+            System.out.println("username: " + username);
+            ThreadContext.put("severity", "DEBUG");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.debug("Username extracted from credentials: " + username);
             User user = userRepository.findByUsername(username);
-            if(user ==null)
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            boolean ValidCredentials = userService.ValidCredentials(username, password);
-
-            if (ValidCredentials) {
-
-                UserResponse userResponse = UserResponse.convertToDTO(user);
-
-                return ResponseEntity.ok().body(userResponse);
-            } 
-            else {
+            if (user == null) {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("User not found for username: " + username);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-        }
-        catch (Exception e) {
+            boolean ValidCredentials = userService.ValidCredentials(username, password);
+            if (ValidCredentials) {
+                ThreadContext.put("severity", "INFO");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.info("User authenticated successfully.");
+                UserResponse userResponse = UserResponse.convertToDTO(user);
+                return ResponseEntity.ok().body(userResponse);
+            } else {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Invalid credentials provided.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        } catch (Exception e) {
+            ThreadContext.put("severity", "ERROR");
+            ThreadContext.put("labels", "FetchUserInfo");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.error("Error fetching user details.", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
     @PostMapping("/v1/user")
-    public ResponseEntity<Object> createUser(@RequestBody User newUser) {
+    public ResponseEntity<Object> createUser(@RequestBody User newUser, HttpServletRequest request) {
         try {
+            ThreadContext.put("severity", "INFO");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.info("Creating new user...");
             if (!healthCheckService.VerifyDatabaseConnection()) {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Database connection not available.");
                 return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(null);
             }
-             
-            if (newUser.getUsername()== null || newUser.getUsername().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Email id is mandatory\"}");
+
+            if (newUser.getUsername() == null || newUser.getUsername().isEmpty()) {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Email id is mandatory for user creation.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"error\": \"Email id is mandatory\"}");
             }
 
             if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Password is mandatory\"}");
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Password is mandatory for user creation.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"error\": \"Password is mandatory\"}");
             }
-            
+
             if (newUser.getFirst_name() == null || newUser.getFirst_name().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"First Name is mandatory\"}");
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("First Name is mandatory for user creation.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"error\": \"First Name is mandatory\"}");
             }
             if (newUser.getLast_name() == null || newUser.getLast_name().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Last Name is mandatory\"}");
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Last Name is mandatory for user creation.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"error\": \"Last Name is mandatory\"}");
             }
 
             if (!CheckValidEmail(newUser.getUsername())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Invalid Email Address\"}");
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Invalid email address provided.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"error\": \"Invalid Email Address\"}");
             }
 
             if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Invalid password format provided.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
+                        "{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
             }
 
             userService.createUser(newUser);
+            ThreadContext.put("severity", "INFO");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.info("User created successfully.");
             UserResponse userResponse = UserResponse.convertToDTO(newUser);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(userResponse);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
+            ThreadContext.put("severity", "ERROR");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.error("Error creating user.", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body("{\"error\": \"User Already Exists!!\"}");
@@ -113,9 +189,14 @@ public class UserController {
     }
 
     @PutMapping("/v1/user/self")
-    public ResponseEntity<Object> updateUser(@RequestBody User newUser, @RequestHeader("Authorization") String header) {
+    public ResponseEntity<Object> updateUser(@RequestBody User newUser, @RequestHeader("Authorization") String header,
+            HttpServletRequest request) {
         try {
-
+            ThreadContext.put("severity", "INFO");
+            ThreadContext.put("labels", "UpdatingUserInfo");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.info("Updating user...");
             String token = null;
             String base64Credentials = header.substring("Basic ".length()).trim();
             String credentials = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
@@ -124,82 +205,139 @@ public class UserController {
             String username = parts[0];
             String password = parts[1];
             User user = userRepository.findByUsername(username);
-            if(user ==null)
+            if (user == null) {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Not authorized to update others details");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             boolean ValidCredentials = userService.ValidCredentials(username, password);
 
-
             if (ValidCredentials) {
-                if (!user.getUsername().equals(newUser.getUsername()) ) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Not Authorized to update username\"}");
+                if (!user.getUsername().equals(newUser.getUsername())) {
+                    ThreadContext.put("severity", "ERROR");
+                    ThreadContext.put("httpMethod", request.getMethod());
+                    ThreadContext.put("path", request.getRequestURI());
+                    log.error("Not authorized to update username.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                            .body("{\"error\": \"Not Authorized to update username\"}");
                 }
 
                 user.setFirst_name(newUser.getFirst_name());
                 user.setLast_name(newUser.getLast_name());
 
-                
                 if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Password is mandatory\"}");
+                    ThreadContext.put("severity", "ERROR");
+                    ThreadContext.put("httpMethod", request.getMethod());
+                    ThreadContext.put("path", request.getRequestURI());
+                    log.error("Password is mandatory for user update.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                            .body("{\"error\": \"Password is mandatory\"}");
                 }
-                
+
                 if (newUser.getFirst_name() == null || newUser.getFirst_name().isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"First Name is mandatory\"}");
+                    ThreadContext.put("severity", "ERROR");
+                    ThreadContext.put("httpMethod", request.getMethod());
+                    ThreadContext.put("path", request.getRequestURI());
+                    log.error("First Name is mandatory for user update.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                            .body("{\"error\": \"First Name is mandatory\"}");
                 }
-                
+
                 if (newUser.getLast_name() == null || newUser.getLast_name().isEmpty()) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Last Name is mandatory\"}");
+                    ThreadContext.put("severity", "ERROR");
+                    ThreadContext.put("httpMethod", request.getMethod());
+                    ThreadContext.put("path", request.getRequestURI());
+                    log.error("Last Name is mandatory for user update.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
+                            .body("{\"error\": \"Last Name is mandatory\"}");
                 }
 
                 if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body("{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
+                    ThreadContext.put("severity", "ERROR");
+                    ThreadContext.put("httpMethod", request.getMethod());
+                    ThreadContext.put("path", request.getRequestURI());
+                    log.error("Invalid password format provided for user update.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
+                            "{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
                 }
-                
+
                 if (newUser.getPassword() != null && !newUser.getPassword().isEmpty()) {
                     user.setPassword(new BCryptPasswordEncoder().encode((newUser.getPassword())));
                 }
-                
+
                 user.setAccount_updated(LocalDateTime.now());
 
                 userRepository.save(user);
-
+                ThreadContext.put("severity", "INFO");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.info("User updated successfully.");
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            } 
-            else {
+            } else {
+                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.error("Invalid credentials provided.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         } catch (Exception e) {
+            ThreadContext.put("severity", "ERROR");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.error("Error updating user.", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-   @RequestMapping(value = "/v1/user/self", method = {RequestMethod.POST, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
-   public ResponseEntity<Void> ExceptGetAndPutInvalidMethod(HttpServletRequest request) {
-       if (!healthCheckService.VerifyDatabaseConnection()) {
-           return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(null);
-       }
-       return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-               .cacheControl(CacheControl.noCache())
-               .build();
-   }
 
-   @RequestMapping(value = "/v1/user", method = {RequestMethod.GET, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.HEAD, RequestMethod.OPTIONS})
-   public ResponseEntity<Void> ExceptPostInvalidMethod(HttpServletRequest request) {
-       if (!healthCheckService.VerifyDatabaseConnection()) {
-           return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(null);
-       }
-       return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-               .cacheControl(CacheControl.noCache())
-               .build();
-   }
+    @RequestMapping(value = "/v1/user/self", method = { RequestMethod.POST, RequestMethod.PATCH, RequestMethod.DELETE,
+            RequestMethod.HEAD, RequestMethod.OPTIONS })
+    public ResponseEntity<Void> ExceptGetAndPutInvalidMethod(HttpServletRequest request) {
+        ThreadContext.put("severity", "WARN");
+        ThreadContext.put("httpMethod", request.getMethod());
+        ThreadContext.put("path", request.getRequestURI());
+        log.warn("Received invalid method request for /v1/user/self: " + request.getMethod());
+        if (!healthCheckService.VerifyDatabaseConnection()) {
+            ThreadContext.put("severity", "ERROR");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.error("Database connection not available.");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .cacheControl(CacheControl.noCache())
+                .build();
+    }
+
+    @RequestMapping(value = "/v1/user", method = { RequestMethod.GET, RequestMethod.PATCH, RequestMethod.DELETE,
+            RequestMethod.HEAD, RequestMethod.OPTIONS })
+    public ResponseEntity<Void> ExceptPostInvalidMethod(HttpServletRequest request) {
+        ThreadContext.put("severity", "WARN");
+        ThreadContext.put("httpMethod", request.getMethod());
+        ThreadContext.put("path", request.getRequestURI());
+        log.warn("Received invalid method request for /v1/user: " + request.getMethod());
+        if (!healthCheckService.VerifyDatabaseConnection()) {
+            ThreadContext.put("severity", "ERROR");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.error("Database connection not available.");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .cacheControl(CacheControl.noCache())
+                .build();
+    }
 
     private boolean CheckValidEmail(String email) {
-    String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
-    Pattern pattern = Pattern.compile(regex);
-    Matcher matcher = pattern.matcher(email);
-    return matcher.matches();
-   }
-    private boolean CheckValidPassword(String password) {
-    String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
-    return password.matches(regex);
+        String regex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
- 
+
+    private boolean CheckValidPassword(String password) {
+        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$";
+        return password.matches(regex);
+    }
 }
