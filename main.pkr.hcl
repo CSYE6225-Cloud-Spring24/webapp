@@ -83,7 +83,7 @@ build {
     ]
   }
 
-  provisioner "file" {
+  provisioner "shell" {
     script = "OpsAgent.sh"
   }
 }
