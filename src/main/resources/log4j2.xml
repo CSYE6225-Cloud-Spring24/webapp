@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+
+        <File name="LogFile" fileName="logs/application.log" append="true">
+            <JsonLayout properties="true" compact="true" eventEol="true">
+                <KeyValuePair key="severity" value="$${ctx:severity}"/>
+                <KeyValuePair key="httpRequestMethod" value="${ctx:httpMethod}" />
+                <KeyValuePair key="path" value="${ctx:path}" />
+                <KeyValuePair key="timestamp" value="$${date:yyyy-MM-dd HH:mm:ss.SSS}" />
+            </JsonLayout>
+        </File>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-5p %d [%t] %c: %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+
+        <Root level="info">
+            <AppenderRef ref="LogFile" />
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
