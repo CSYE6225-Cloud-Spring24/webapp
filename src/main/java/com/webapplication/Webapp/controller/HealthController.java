@@ -44,18 +44,10 @@ public class HealthController {
         }
         try {
             healthCheckService.checkDatabaseConnection();
-            // ThreadContext.put("severity", "INFO");
-            // ThreadContext.put("httpMethod", request.getMethod());
-            // ThreadContext.put("path", request.getRequestURI());
-            // log.info("Database connected successfully");
-
-            ThreadContext.put("requestBody", requestBody);
-            ThreadContext.put("responseBody", responseBody);
-            ThreadContext.put("operation", operation);
-            ThreadContext.put("sourceLocation", sourceLocation);
-            ThreadContext.put("spanId", spanId);
-            ThreadContext.put("trace", trace);
-            ThreadContext.put("traceSampled", traceSampled);
+            ThreadContext.put("severity", "INFO");
+            ThreadContext.put("httpMethod", request.getMethod());
+            ThreadContext.put("path", request.getRequestURI());
+            log.info("Database connected successfully");
             return ResponseEntity.ok()
                     .headers(httpHeaders())
                     .build();
