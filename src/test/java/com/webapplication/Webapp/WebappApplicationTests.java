@@ -210,7 +210,6 @@ class WebappApplicationTests {
 		if (existingUser != null) {
 
 			User updatedUser = new User();
-			updatedUser.setUsername(existingUser.getUsername()); // Preserve username
 			updatedUser.setFirst_name("UpdatedFirstName");
 			updatedUser.setLast_name("UpdatedLastName");
 			updatedUser.setPassword("NewKeerthana@123");
@@ -250,7 +249,7 @@ class WebappApplicationTests {
 		String password = "NewKeerthana@123";
 		String token = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 		
-		String requestBody = "{\"username\":\"keerthana@gmail.com\", \"first_name\":\"\", \"last_name\":\"UpdatedLastName\", \"password\":\"Updatedpassword\"}";
+		String requestBody = "{\"first_name\":\"\", \"last_name\":\"UpdatedLastName\", \"password\":\"Updatedpassword\"}";
 
 		given()
 				.contentType(ContentType.JSON)
@@ -270,7 +269,7 @@ class WebappApplicationTests {
 		String password = "NewKeerthana@123";
 		String token = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
-		String requestBody = "{\"username\":\"keerthana@gmail.com\",\"first_name\":\"UpdatedFirstName\", \"last_name\":\"\", \"password\":\"Updatedpassword\"}";
+		String requestBody = "{\"first_name\":\"UpdatedFirstName\", \"last_name\":\"\", \"password\":\"Updatedpassword\"}";
 
 		given()
 				.contentType(ContentType.JSON)
