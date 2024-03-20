@@ -2,6 +2,9 @@
 
 sudo chown -R csye6225:csye6225 /etc/google-cloud-ops-agent/
 
+sudo mkdir -p /var/logs/webapp/
+sudo chown -R csye6225:csye6225 /var/logs/webapp/
+
 cat <<EOF | sudo tee /etc/google-cloud-ops-agent/config.yaml
 logging:
   receivers:
