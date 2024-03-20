@@ -70,10 +70,10 @@ public class UserController {
             log.debug("Username extracted from credentials: " + username);
             User user = userRepository.findByUsername(username);
             if (user == null) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("User not found for username: " + username);
+                log.warn("User not found for username: " + username);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
             boolean ValidCredentials = userService.ValidCredentials(username, password);
@@ -117,56 +117,56 @@ public class UserController {
             }
 
             if (newUser.getUsername() == null || newUser.getUsername().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Email id is mandatory for user creation.");
+                log.warn("Email id is mandatory for user creation.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Email id is mandatory\"}");
             }
 
             if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Password is mandatory for user creation.");
+                log.warn("Password is mandatory for user creation.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Password is mandatory\"}");
             }
 
             if (newUser.getFirst_name() == null || newUser.getFirst_name().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("First Name is mandatory for user creation.");
+                log.warn("First Name is mandatory for user creation.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"First Name is mandatory\"}");
             }
             if (newUser.getLast_name() == null || newUser.getLast_name().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Last Name is mandatory for user creation.");
+                log.warn("Last Name is mandatory for user creation.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Last Name is mandatory\"}");
             }
 
             if (!CheckValidEmail(newUser.getUsername())) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "DEBUG");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Invalid email address provided.");
+                log.debug("Invalid email address provided");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Invalid Email Address\"}");
             }
 
             if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "DEBUG");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Invalid password format provided.");
+                log.debug("Invalid password format provided.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
-                        "{\"error\": \"Invalid password. Please enter password containing atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
+                        "{\"error\": \"Invalid password. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
             }
 
             userService.createUser(newUser);
@@ -227,10 +227,10 @@ public class UserController {
                     newUser.getAccount_updated() != null ||
                     newUser.getAccount_created() != null ||
                     newUser.getId() != null) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error(
+                log.warn(
                         "Username, account_updated, account_created, and id fields should not be provided in the payload.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -248,19 +248,19 @@ public class UserController {
             }
 
             if (newUser.getPassword() == null || newUser.getPassword().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Password is mandatory for user update.");
+                log.warn("Password is mandatory for user update.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Password is mandatory\"}");
             }
 
             if (newUser.getFirst_name() == null || newUser.getFirst_name().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("First Name is mandatory for user update.");
+                log.warn("First Name is mandatory for user update.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"First Name is mandatory\"}");
@@ -268,20 +268,20 @@ public class UserController {
             }
 
             if (newUser.getLast_name() == null || newUser.getLast_name().isEmpty()) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error("Last Name is mandatory for user update.");
+                log.warn("Last Name is mandatory for user update.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body("{\"error\": \"Last Name is mandatory\"}");
             }
 
             if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                ThreadContext.put("severity", "ERROR");
+                ThreadContext.put("severity", "DEBUG");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.error(
+                log.debug(
                         "Invalid password format provided for user update. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
                         "{\"error\": \"Invalid password. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
@@ -309,7 +309,7 @@ public class UserController {
     @RequestMapping(value = "/v1/user/self", method = { RequestMethod.POST, RequestMethod.PATCH, RequestMethod.DELETE,
             RequestMethod.HEAD, RequestMethod.OPTIONS })
     public ResponseEntity<Void> ExceptGetAndPutInvalidMethod(HttpServletRequest request) {
-        ThreadContext.put("severity", "WARNING");
+        ThreadContext.put("severity", "WARN");
         ThreadContext.put("httpMethod", request.getMethod());
         ThreadContext.put("path", request.getRequestURI());
         log.warn("Received invalid method request for /v1/user/self: " + request.getMethod());
@@ -328,7 +328,7 @@ public class UserController {
     @RequestMapping(value = "/v1/user", method = { RequestMethod.GET, RequestMethod.PATCH, RequestMethod.DELETE,
             RequestMethod.HEAD, RequestMethod.OPTIONS })
     public ResponseEntity<Void> ExceptPostInvalidMethod(HttpServletRequest request) {
-        ThreadContext.put("severity", "WARNING");
+        ThreadContext.put("severity", "WARN");
         ThreadContext.put("httpMethod", request.getMethod());
         ThreadContext.put("path", request.getRequestURI());
         log.warn("Received invalid method request for /v1/user: " + request.getMethod());
