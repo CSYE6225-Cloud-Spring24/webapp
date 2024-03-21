@@ -278,10 +278,10 @@ public class UserController {
             }
 
             if (newUser.getPassword() != null && !CheckValidPassword(newUser.getPassword())) {
-                ThreadContext.put("severity", "DEBUG");
+                ThreadContext.put("severity", "WARN");
                 ThreadContext.put("httpMethod", request.getMethod());
                 ThreadContext.put("path", request.getRequestURI());
-                log.debug(
+                log.warn(
                         "Invalid password format provided for user update. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
                         "{\"error\": \"Invalid password. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
