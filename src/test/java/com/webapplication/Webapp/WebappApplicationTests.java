@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,7 +64,8 @@ class WebappApplicationTests {
 		newUser.setPassword("Keerthana@123");
 		newUser.setFirst_name("Keerthana");
 		newUser.setLast_name("Mikkili");
-
+		newUser.setVerified(true); // Set is_verified to true
+		// newUser.setVerification_expiration(LocalDateTime.now().plusMinutes(5));
 
 		User existingUser = userRepository.findByUsername("keerthana@gmail.com");
 		if (existingUser != null) {
