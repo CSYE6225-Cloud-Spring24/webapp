@@ -4,14 +4,17 @@ import com.webapplication.Webapp.entity.User;
 import com.webapplication.Webapp.entity.UserResponse;
 import com.webapplication.Webapp.repository.UserRepository;
 import com.webapplication.Webapp.service.HealthCheckService;
+import com.webapplication.Webapp.service.PubSubPublisher;
 import com.webapplication.Webapp.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,8 +25,11 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 public class UserController {
@@ -38,6 +44,13 @@ public class UserController {
     private HealthCheckService healthCheckService;
 
     private static final Logger log = LogManager.getLogger(UserController.class);
+
+    @Autowired
+    private PubSubPublisher pubSubPublisher;
+
+    // @Autowired
+    // private EmailService emailService; // Assuming you have an EmailService to
+    // send emails
 
     @GetMapping("/v1/user/self")
     public ResponseEntity<UserResponse> fetchUserDetails(@RequestHeader("Authorization") String header,
@@ -75,6 +88,15 @@ public class UserController {
                 ThreadContext.put("path", request.getRequestURI());
                 log.warn("User not found for username: " + username);
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            if (!user.isVerified()) {
+                // User account not verified
+                // Log and return forbidden response
+                ThreadContext.put("severity", "WARN");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.warn("User account not verified for username: " + username);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
             boolean ValidCredentials = userService.ValidCredentials(username, password);
             if (ValidCredentials) {
@@ -168,12 +190,19 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
                         "{\"error\": \"Invalid password. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
             }
-
+            String token = UUID.randomUUID().toString();
+            newUser.setVerificationToken(token);
             userService.createUser(newUser);
             ThreadContext.put("severity", "INFO");
             ThreadContext.put("httpMethod", request.getMethod());
             ThreadContext.put("path", request.getRequestURI());
             log.info("User created successfully.");
+            String verificationLink = generateVerificationLink(newUser.getVerificationToken().toString());
+            pubSubPublisher.publishUserInformation(newUser,verificationLink);
+
+            // Generate the verification link with a 2-minute expiration
+            // String verificationLink = generateVerificationLink(newUser.getVerificationToken().toString());
+            System.out.println(verificationLink);
             UserResponse userResponse = UserResponse.convertToDTO(newUser);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(userResponse);
@@ -213,6 +242,17 @@ public class UserController {
                 log.error("Not authorized to update others details");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
+
+            if (!user.isVerified()) {
+                // User account not verified
+                // Log and return forbidden response
+                ThreadContext.put("severity", "WARN");
+                ThreadContext.put("httpMethod", request.getMethod());
+                ThreadContext.put("path", request.getRequestURI());
+                log.warn("User account not verified for username: " + username);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            
             boolean isValidCredentials = userService.ValidCredentials(username, password);
 
             if (!isValidCredentials) {
@@ -375,4 +415,123 @@ public class UserController {
             user.setPassword(new BCryptPasswordEncoder().encode(newUser.getPassword()));
         }
     }
+
+    // @GetMapping("/verify-email")
+    // public ResponseEntity<String> verifyEmail(@QueryParam("token") String token,
+    // @QueryParam("expiration") String expiration) {
+    // try {
+    // User user = userRepository.findByVerificationToken(token,);
+    // if (user != null) {
+    // // If user is found with the provided verification token, mark the user as
+    // verified
+    // user.setVerified(true);
+    // user.setVerificationToken(null); // Clear the verification token
+    // userRepository.save(user);
+    // return ResponseEntity.ok("Email verified successfully.");
+    // } else {
+    // // If user is not found, return an error message
+    // return ResponseEntity.badRequest().body("Invalid verification token.");
+    // }
+    // } catch (Exception e) {
+    // // Handle any exceptions and return an error response
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
+    // verifying email.");
+    // }
+    // }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token,
+            @RequestParam("expiration") String expiration) {
+        try {
+            User user = userRepository.findByVerificationToken(token);
+            if (user != null) {
+                // Check if the token is expired
+                // LocalDateTime expirationTime = LocalDateTime.parse(expiration, DateTimeFormatter.ISO_DATE_TIME);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+                LocalDateTime expirationTime = LocalDateTime.parse(expiration, formatter);
+                LocalDateTime currentTime = LocalDateTime.now();
+                if (expirationTime.isAfter(currentTime)) {
+                    // If user is found with the provided verification token and token is not
+                    // expired, mark the user as verified
+                    user.setVerified(true);
+                    user.setVerificationToken(null); // Clear the verification token
+                    userRepository.save(user);
+                    return ResponseEntity.ok("Email verified successfully.");
+                } else {
+                    // If the token is expired, return an error message
+                    return ResponseEntity.badRequest().body("Verification token has expired.");
+                }
+            } else {
+                // If user is not found, return an error message
+                return ResponseEntity.badRequest().body("Invalid verification token.");
+            }
+        } catch (Exception e) {
+            // Handle any exceptions and return an error response
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error verifying email.");
+        }
+    }
+
+    private String generateVerificationLink(String token) {
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(2); // Link expires after 2 minutes
+
+        // Format the expiration time as a string in a suitable format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String formattedExpirationTime = expirationTime.format(formatter);
+
+        // Include the expiration time in the verification link
+        return "https://mg.keerthanamikkili.me:8080/verify-email?token=" + token + "&expiration="
+                + formattedExpirationTime;
+    }
 }
+// @GetMapping("/v1/user/verify-email")
+// public ResponseEntity<String> sendVerificationEmail(@RequestParam("email")
+// String email, HttpServletResponse response) {
+// try {
+// User user = userRepository.findByUsername(email);
+// if (user == null) {
+// return ResponseEntity.badRequest().body("User not found.");
+// }
+
+// // Generate verification token
+// UUID verificationToken = UUID.randomUUID();
+// user.setVerificationToken(verificationToken);
+// userRepository.save(user);
+
+// // Construct verification link
+// String verificationLink =
+// "https://mg.keerthanamikkili.me:8080/verify-email?token=" +
+// verificationToken;
+
+// // Send verification email
+// emailService.sendVerificationEmail(email, verificationLink);
+
+// return ResponseEntity.ok("Verification email sent successfully.");
+// } catch (Exception e) {
+// return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
+// sending verification email.");
+// }
+// }
+
+// @GetMapping("/v1/user/verify-email")
+// public ResponseEntity<String> verifyEmail(@RequestParam("token") UUID token)
+// {
+// try {
+// User user = userRepository.findByVerificationToken(token);
+// if (user != null) {
+// // If user is found with the provided verification token, mark the user as
+// verified
+// user.setVerified(true);
+// user.setVerificationToken(null); // Clear the verification token
+// userRepository.save(user);
+// return ResponseEntity.ok("Email verified successfully.");
+// } else {
+// // If user is not found, return an error message
+// return ResponseEntity.badRequest().body("Invalid verification token.");
+// }
+// } catch (Exception e) {
+// // Handle any exceptions and return an error response
+// return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
+// verifying email.");
+// }
+// }
+// }
