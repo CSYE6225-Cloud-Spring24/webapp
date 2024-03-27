@@ -30,6 +30,9 @@ public class User {
     private LocalDateTime account_created;
     @UpdateTimestamp
     private LocalDateTime account_updated;
+    private boolean verified; // New field for verification status
+    private String verificationToken; // New field for verification token
+
 
     public User(UUID id, String first_name, String last_name, String username, String password, LocalDateTime account_created, LocalDateTime account_updated) {
         this.id = id;
@@ -122,5 +125,21 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         this.account_updated = LocalDateTime.now();
+    }
+
+    public boolean isVerified() {
+        return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
+    }
+
+    public String getVerificationToken() {
+        return verificationToken;
+    }
+
+    public void setVerificationToken(String verificationToken) {
+        this.verificationToken = verificationToken;
     }
 }
