@@ -23,7 +23,8 @@ public class PubSubPublisher {
         this.topicId = topicId;
     }
 
-    public void publishUserInformation(User user,String verificationLink) {
+    public void publishUserInformation(User user) 
+    {
         Publisher publisher = null;
         try {
             TopicName topicName = TopicName.of(projectId, topicId);
@@ -37,8 +38,8 @@ public class PubSubPublisher {
             // .build();
 
             // Concatenate user data into a JSON string
-            String jsonPayload = "{\"username\": \"" + user.getUsername() + "\", \"verificationLink\": \""
-                    + verificationLink + "\"}";
+            String jsonPayload = "{\"username\": \"" + user.getUsername() + "\", \"UserId\": \""
+                    + user.getId() + "\"}";
 
             // Create a PubsubMessage with the JSON payload
             PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
