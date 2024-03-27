@@ -10,6 +10,8 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Entity
 public class User {
 
@@ -30,9 +32,13 @@ public class User {
     private LocalDateTime account_created;
     @UpdateTimestamp
     private LocalDateTime account_updated;
-    private boolean verified; // New field for verification status
-    private String verificationToken; // New field for verification token
-
+    // private boolean verified; // New field for verification status
+    // private String verificationToken; // New field for verification token
+    @JsonProperty("is_verified")
+    @Column(nullable = false, name = "Is_Verified")
+    private int is_verified; // Use Boolean type
+    @Column(name = "verification_expiration")
+    private LocalDateTime verification_expiration;
 
     public User(UUID id, String first_name, String last_name, String username, String password, LocalDateTime account_created, LocalDateTime account_updated) {
         this.id = id;
@@ -120,6 +126,8 @@ public class User {
     protected void onCreate() {
         this.account_created = LocalDateTime.now();
         this.account_updated = LocalDateTime.now();
+        this.is_verified=0;
+        this.verification_expiration=LocalDateTime.now().plusMinutes(2);
     }
 
     @PreUpdate
@@ -127,19 +135,33 @@ public class User {
         this.account_updated = LocalDateTime.now();
     }
 
-    public boolean isVerified() {
-        return verified;
+    // public boolean isVerified() {
+    //     return verified;
+    // }
+
+    // public void setVerified(boolean verified) {
+    //     this.verified = verified;
+    // }
+
+    // public String getVerificationToken() {
+    //     return verificationToken;
+    // }
+
+    // public void setVerificationToken(String verificationToken) {
+    //     this.verificationToken = verificationToken;
+    // }
+    public int getIs_verified() {
+        return is_verified;
     }
 
-    public void setVerified(boolean verified) {
-        this.verified = verified;
+    public void setIs_verified(int is_verified) {
+        this.is_verified = is_verified;
+    }
+    public LocalDateTime getVerification_expiration() {
+        return verification_expiration;
     }
 
-    public String getVerificationToken() {
-        return verificationToken;
-    }
-
-    public void setVerificationToken(String verificationToken) {
-        this.verificationToken = verificationToken;
+    public void setVerification_expiration(LocalDateTime verification_expiration) {
+        this.verification_expiration = verification_expiration;
     }
 }
