@@ -30,13 +30,6 @@ public class PubSubPublisher {
             TopicName topicName = TopicName.of(projectId, topicId);
             publisher = Publisher.newBuilder(topicName).build();
 
-            // String jsonPayload = String.format("{\"UserName\":\"%s\",\"UserId\":\"%s\"}",
-            // user.getUsername(), user.getId().toString());
-
-            // PubsubMessage pubsubMessage = PubsubMessage.newBuilder()
-            // .setData(ByteString.copyFromUtf8(jsonPayload))
-            // .build();
-
             // Concatenate user data into a JSON string
             String jsonPayload = "{\"username\": \"" + user.getUsername() + "\", \"UserId\": \""
                     + user.getId() + "\"}";
