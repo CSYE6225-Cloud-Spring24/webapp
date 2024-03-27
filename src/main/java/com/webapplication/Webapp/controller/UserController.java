@@ -479,7 +479,7 @@ public class UserController {
         String formattedExpirationTime = expirationTime.format(formatter);
 
         // Include the expiration time in the verification link
-        return "https://mg.keerthanamikkili.me:8080/verify-email?token=" + token + "&expiration="
+        return "https://keerthanamikkili.me:8080/verify-email?token=" + token + "&expiration="
                 + formattedExpirationTime;
     }
 }
