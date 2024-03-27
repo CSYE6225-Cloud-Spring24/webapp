@@ -49,10 +49,6 @@ public class UserController {
     @Autowired
     private PubSubPublisher pubSubPublisher;
 
-    // @Autowired
-    // private EmailService emailService; // Assuming you have an EmailService to
-    // send emails
-
     @GetMapping("/v1/user/self")
     public ResponseEntity<UserResponse> fetchUserDetails(@RequestHeader("Authorization") String header,
             HttpServletRequest request) {
@@ -191,19 +187,15 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).contentType(MediaType.APPLICATION_JSON).body(
                         "{\"error\": \"Invalid password. Password should contain atleast one uppercase, one lowercase, and one digit and minimum length of 8\"}");
             }
-            // String token = UUID.randomUUID().toString();
-            // newUser.setVerificationToken(token);
+      
             userService.createUser(newUser);
             ThreadContext.put("severity", "INFO");
             ThreadContext.put("httpMethod", request.getMethod());
             ThreadContext.put("path", request.getRequestURI());
             log.info("User created successfully.");
-            // String verificationLink = generateVerificationLink(newUser.getVerificationToken().toString());
-            // pubSubPublisher.publishUserInformation(newUser,verificationLink);
+         
             pubSubPublisher.publishUserInformation(newUser);
-            // Generate the verification link with a 2-minute expiration
-            // String verificationLink = generateVerificationLink(newUser.getVerificationToken().toString());
-            // System.out.println(verificationLink);
+         
             UserResponse userResponse = UserResponse.convertToDTO(newUser);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(userResponse);
@@ -417,75 +409,10 @@ public class UserController {
         }
     }
 
-    // @GetMapping("/verify-email")
-    // public ResponseEntity<String> verifyEmail(@QueryParam("token") String token,
-    // @QueryParam("expiration") String expiration) {
-    // try {
-    // User user = userRepository.findByVerificationToken(token,);
-    // if (user != null) {
-    // // If user is found with the provided verification token, mark the user as
-    // verified
-    // user.setVerified(true);
-    // user.setVerificationToken(null); // Clear the verification token
-    // userRepository.save(user);
-    // return ResponseEntity.ok("Email verified successfully.");
-    // } else {
-    // // If user is not found, return an error message
-    // return ResponseEntity.badRequest().body("Invalid verification token.");
-    // }
-    // } catch (Exception e) {
-    // // Handle any exceptions and return an error response
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
-    // verifying email.");
-    // }
-    // }
-
-    // @GetMapping("/verify-email")
-    // public ResponseEntity<String> verifyEmail(@RequestParam("token") String token,
-    //         @RequestParam("expiration") String expiration) {
-    //     try {
-    //         User user = userRepository.findByVerificationToken(token);
-    //         if (user != null) {
-    //             // Check if the token is expired
-    //             // LocalDateTime expirationTime = LocalDateTime.parse(expiration, DateTimeFormatter.ISO_DATE_TIME);
-    //             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-    //             LocalDateTime expirationTime = LocalDateTime.parse(expiration, formatter);
-    //             LocalDateTime currentTime = LocalDateTime.now();
-    //             if (expirationTime.isAfter(currentTime)) {
-    //                 // If user is found with the provided verification token and token is not
-    //                 // expired, mark the user as verified
-    //                 user.setVerified(true);
-    //                 user.setVerificationToken(null); // Clear the verification token
-    //                 userRepository.save(user);
-    //                 return ResponseEntity.ok("Email verified successfully.");
-    //             } else {
-    //                 // If the token is expired, return an error message
-    //                 return ResponseEntity.badRequest().body("Verification token has expired.");
-    //             }
-    //         } else {
-    //             // If user is not found, return an error message
-    //             return ResponseEntity.badRequest().body("Invalid verification token.");
-    //         }
-    //     } catch (Exception e) {
-    //         // Handle any exceptions and return an error response
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error verifying email.");
-    //     }
-    // }
-
-    // private String generateVerificationLink(String token) {
-    //     LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(2); // Link expires after 2 minutes
-
-    //     // Format the expiration time as a string in a suitable format
-    //     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-    //     String formattedExpirationTime = expirationTime.format(formatter);
-
-    //     // Include the expiration time in the verification link
-    //     return "https://keerthanamikkili.me:8080/verify-email?token=" + token + "&expiration="
-    //             + formattedExpirationTime;
-    // }
+    
     @GetMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
-        // Retrieve the user by token (assuming you have a method for this in UserService)
+        // Retrieve the user by token 
         UUID id = UUID.fromString(token);
         Optional<User> optionalUser = userService.getUserById(id);
 
@@ -506,55 +433,4 @@ public class UserController {
         return ResponseEntity.ok("User verified successfully");
     }
 }
-// @GetMapping("/v1/user/verify-email")
-// public ResponseEntity<String> sendVerificationEmail(@RequestParam("email")
-// String email, HttpServletResponse response) {
-// try {
-// User user = userRepository.findByUsername(email);
-// if (user == null) {
-// return ResponseEntity.badRequest().body("User not found.");
-// }
 
-// // Generate verification token
-// UUID verificationToken = UUID.randomUUID();
-// user.setVerificationToken(verificationToken);
-// userRepository.save(user);
-
-// // Construct verification link
-// String verificationLink =
-// "https://mg.keerthanamikkili.me:8080/verify-email?token=" +
-// verificationToken;
-
-// // Send verification email
-// emailService.sendVerificationEmail(email, verificationLink);
-
-// return ResponseEntity.ok("Verification email sent successfully.");
-// } catch (Exception e) {
-// return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
-// sending verification email.");
-// }
-// }
-
-// @GetMapping("/v1/user/verify-email")
-// public ResponseEntity<String> verifyEmail(@RequestParam("token") UUID token)
-// {
-// try {
-// User user = userRepository.findByVerificationToken(token);
-// if (user != null) {
-// // If user is found with the provided verification token, mark the user as
-// verified
-// user.setVerified(true);
-// user.setVerificationToken(null); // Clear the verification token
-// userRepository.save(user);
-// return ResponseEntity.ok("Email verified successfully.");
-// } else {
-// // If user is not found, return an error message
-// return ResponseEntity.badRequest().body("Invalid verification token.");
-// }
-// } catch (Exception e) {
-// // Handle any exceptions and return an error response
-// return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error
-// verifying email.");
-// }
-// }
-// }
