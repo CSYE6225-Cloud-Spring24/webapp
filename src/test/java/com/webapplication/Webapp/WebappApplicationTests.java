@@ -233,7 +233,6 @@ class WebappApplicationTests {
 			assertEquals("Mikkili", fetchedUser.getLast_name());
 			assertEquals(existingUser.getUsername(), fetchedUser.getUsername());
 			assertEquals(existingUser.getAccount_created(), fetchedUser.getAccount_created());
-			// assertNotEquals(existingUser.getAccount_updated(), fetchedUser.getAccount_updated());
 
 		} else {
 			fail("User does not exist for username: " + username);
