@@ -16,13 +16,13 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
-	<repositories>
+	<!-- <repositories>
 		<repository>
 			<id>google-cloud</id>
 			<name>Google Cloud Repository</name>
 			<url>https://maven.pkg.dev/google-cloud-platform</url>
 		</repository>
-	</repositories>
+	</repositories> -->
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
