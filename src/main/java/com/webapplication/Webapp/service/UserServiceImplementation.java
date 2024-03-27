@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImplementation implements UserService {
@@ -48,5 +50,14 @@ public class UserServiceImplementation implements UserService {
      public boolean ValidCredentials(String username, String password) {
         User user = userRepository.findByUsername(username);
         return BCrypt.checkpw(password,user.getPassword());
+    }
+
+    public Optional<User> getUserById(UUID id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public void saveUser(User user) {
+        userRepository.save(user); 
     }
 }
