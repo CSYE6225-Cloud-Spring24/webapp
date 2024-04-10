@@ -68,17 +68,17 @@ jobs:
 
       - name: Configure instance group with new template
         run: |
-          gcloud compute instance-groups managed set-instance-template webapp-igm --zone=us-east1 --template=webapp-instance-template-version1 
+          gcloud compute instance-groups managed set-instance-template webapp-igm --region=us-east1 --template=webapp-instance-template-version1 --project=devv-415008
 
       - name: Start rolling update
         run: |
-          gcloud compute instance-groups managed rolling-action start-update webapp-igm --zone=us-east1
+          gcloud compute instance-groups managed rolling-action start-update webapp-igm --version=template="webapp-instance-template-version1" --max-surge=5 --region=us-east1 --project=devv-415008
 
       - name: Monitor instance group update
         run: |
           status="RUNNING"
           while [ "$status" != "ROLLOUT_DONE" ]; do
-          status=$(gcloud compute instance-groups managed describe webapp-igm --zone=us-east1 --format='value(instanceGroupStatus.versionTarget.utilizationTarget)')
+          status=$(gcloud compute instance-groups managed describe webapp-igm --region=us-east1 --project=devv-415008 --format='value(instanceGroupStatus.versionTarget.utilizationTarget)')
           sleep 10
           done
 
