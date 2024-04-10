@@ -81,7 +81,7 @@ jobs:
       - name: Create new instance template version
         run: |
           gcloud compute images list  --sort-by=~creationTimestamp --format='value(NAME)' --limit=1
-          gcloud compute instance-templates create ${{env.INSTANCE_TEMPLATE_NAME}} --project=${{env.PROJECT}} --machine-type=${{env.MACHINE_TYPE}} --network-interface=network-tier=${{env.NETWORK_TIER}},subnet=${{env.SUBNET}} --metadata=startup-script=${{env.METADATA}} --maintenance-policy=${{env.POLICY}} --provisioning-model=${{env.MODEL}} --service-account=${{env.SERVICE_ACCOUNT}} --scopes=${{env.SCOPE}} --region=${{env.REGION}} --tags=${{env.TAGS}} --create-disk=auto-delete=yes,boot=yes,device-name=${{env.DEVICE}},image=${{env.IMAGE}},kms-key=${{env.KMS_VM_KEY}},mode=rw,size=100,type=${{env.TYPE}} --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --labels=app=web,environment=dev --reservation-affinity=any
+          gcloud compute instance-templates create ${{env.INSTANCE_TEMPLATE_NAME}} --project=${{env.PROJECT}} --machine-type=${{env.MACHINE_TYPE}} --network-interface=network-tier=${{env.NETWORK_TIER}},subnet=${{env.SUBNET}} --instance-template-region=${{env.REGION}} --metadata=startup-script=${{env.METADATA}} --maintenance-policy=${{env.POLICY}} --provisioning-model=${{env.MODEL}} --service-account=${{env.SERVICE_ACCOUNT}} --scopes=${{env.SCOPE}} --region=${{env.REGION}} --tags=${{env.TAGS}} --create-disk=auto-delete=yes,boot=yes,device-name=${{env.DEVICE}},image=${{env.IMAGE}},kms-key=${{env.KMS_VM_KEY}},mode=rw,size=100,type=${{env.TYPE}} --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --labels=app=web,environment=dev --reservation-affinity=any
 
       - name: Configure instance group with new template
         run: |
