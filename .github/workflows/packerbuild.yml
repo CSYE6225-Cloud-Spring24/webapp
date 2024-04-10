@@ -13,6 +13,7 @@ jobs:
       DATABASE_URL: ${{secrets.DATABASE_URL}}
       DATABASE_USERNAME: ${{secrets.DATABASE_USERNAME}}
       DATABASE_PASSWORD: ${{secrets.DATABASE_PASSWORD}}
+    
     steps:
       - name: Checkout code from branch
         uses: actions/checkout@v3
@@ -60,6 +61,26 @@ jobs:
         id: build
         run: packer build main.pkr.hcl
 
+      - name: Create new instance template version
+        run: |
+          latest_image=$(gcloud compute images list --filter="family=[IMAGE_FAMILY]" --format="value(ID)")
+          gcloud compute instance-templates create [NEW_TEMPLATE_NAME] --source-instance-template [EXISTING_TEMPLATE_NAME] --image=$latest_image --description="New template version with latest machine image" --region=[REGION]
+
+      - name: Configure instance group with new template
+        run: |
+          gcloud compute instance-groups managed set-instance-template [INSTANCE_GROUP_NAME] --template=[NEW_TEMPLATE_NAME] --zone=[ZONE]
+
+      - name: Start rolling update
+        run: |
+          gcloud compute instance-groups managed rolling-action start-update [INSTANCE_GROUP_NAME] --zone=[ZONE]
+
+      - name: Monitor instance group update
+        run: |
+          status="RUNNING"
+          while [ "$status" != "ROLLOUT_DONE" ]; do
+          status=$(gcloud compute instance-groups managed describe [INSTANCE_GROUP_NAME] --zone=[ZONE] --format='value(instanceGroupStatus.versionTarget.utilizationTarget)')
+          sleep 10
+          done
         
 
   
