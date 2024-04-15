@@ -2,12 +2,13 @@ name: Packer Build Custom Image
  
 on:
   pull_request:
-   types: [closed]
+    branches: [ "main" ]
+  # pull_request:
+  #  types: [closed]
  
 jobs:
   packer_init_validate_build:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     env:
       DATABASE: webappDB
       DATABASE_URL: ${{secrets.DATABASE_URL}}
