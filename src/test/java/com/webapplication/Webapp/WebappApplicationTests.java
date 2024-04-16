@@ -73,7 +73,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(newUser)
 					.when()
-					.post("/v1/user")
+					.post("/v5/user")
 					.then()
 					.assertThat()
 					.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -90,7 +90,7 @@ class WebappApplicationTests {
 				.contentType(ContentType.JSON)
 				.body(newUser)
 				.when()
-				.post("/v1/user")
+				.post("/v5/user")
 				.then()
 				.assertThat()
 				.statusCode(HttpStatus.CREATED.value());
@@ -99,7 +99,7 @@ class WebappApplicationTests {
 		given()
 				.header(HttpHeaders.AUTHORIZATION, "Basic " + getBase64Credentials("keerthana@gmail.com", "Keerthana@123"))
 				.when()
-				.get("/v1/user/self")
+				.get("/v5/user/self")
 				.then()
 				.assertThat()
 				.statusCode(HttpStatus.FORBIDDEN.value());
@@ -108,7 +108,7 @@ class WebappApplicationTests {
 				.contentType(ContentType.JSON)
 				.body(newUser)
 				.when()
-				.post("/v1/user")
+				.post("/v5/user")
 				.then()
 				.assertThat()
 				.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -123,7 +123,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(newUser)
 					.when()
-					.post("/v1/user")
+					.post("/v5/user")
 					.then()
 					.assertThat()
 					.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -141,7 +141,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(newUser)
 					.when()
-					.post("/v1/user")
+					.post("/v5/user")
 					.then()
 					.assertThat()
 					.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -159,7 +159,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(newUser)
 					.when()
-					.post("/v1/user")
+					.post("/v5/user")
 					.then()
 					.assertThat()
 					.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -177,7 +177,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(newUser)
 					.when()
-					.post("/v1/user")
+					.post("/v5/user")
 					.then()
 					.assertThat()
 					.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -190,7 +190,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(newUser)
 					.when()
-					.post("/v1/user")
+					.post("/v5/user")
 					.then()
 					.assertThat()
 					.statusCode(HttpStatus.BAD_REQUEST.value());
@@ -219,7 +219,7 @@ class WebappApplicationTests {
 					.contentType(ContentType.JSON)
 					.body(updatedUser)
 					.when()
-					.put("/v1/user/self")
+					.put("/v5/user/self")
 					.then()
 					.log().all()
 					.assertThat()
@@ -253,7 +253,7 @@ class WebappApplicationTests {
 				.header("Authorization", "Bearer " + token)
 				.body(requestBody)
 				.when()
-				.put("/v1/user/self")
+				.put("/v5/user/self")
 				.then()
 				.statusCode(HttpStatus.FORBIDDEN.value());
 	}
@@ -272,7 +272,7 @@ class WebappApplicationTests {
 				.header("Authorization", "Bearer " + token)
 				.body(requestBody)
 				.when()
-				.put("/v1/user/self")
+				.put("/v5/user/self")
 				.then()
 				.statusCode(HttpStatus.FORBIDDEN.value());
 	}
